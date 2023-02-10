@@ -2,6 +2,9 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 import random
+import requests
+import scrapy
+import discord_emoji
 
 intents = discord.Intents.all()
 client = commands.Bot(command_prefix="!",
@@ -16,7 +19,29 @@ async def on_ready():
 
 @client.command()
 async def ola(ctx):
-  await ctx.send(f'Olá, @{ctx.author}')
+  await ctx.send(f'Olá, {ctx.author}')
+
+
+@client.command()
+async def filme(ctx):
+  name = 'imdb'
+  start_urls = ['http://imdb.com/']
+  filmes = []
+
+  def parse(self, response):
+    x = random.randint(1, 250)
+    for filmes in response.css('.titleColumn'):
+      filme = {
+        titulo: filmes.css(f'tr:nth-child({x}).titleColumn a::text'),
+        ano: filmes.css(f'tr:nth-child({x}).secondaryInfo ::text'),
+        nota: response.css(f'tr:nth-child({x}) strong::text'),
+      }
+      filmes.append(filme)
+
+      print(filme)
+
+  for filme in filmes:
+    await ctx.send(f"{filme['titulo']} {filme['ano']} {filme['nota']}")
 
 
 @client.command()
@@ -27,7 +52,9 @@ async def dado(ctx, numero):
 
 @client.command()
 async def toninho(ctx):
-  await ctx.send('peida nao toninho')
+  await ctx.send('peida nao toninho {}{}'.format(
+    discord_emoji.to_unicode(":face_with_hand_over_mouth:"),
+    discord_emoji.to_unicode(":zany_face:")))
 
 
 @client.command()
@@ -36,8 +63,25 @@ async def gabi(ctx):
 
 
 @client.command()
+async def dolar(ctx):
+  padrao = float('5.1322')
+  requisicao = requests.get("https://economia.awesomeapi.com.br/last/USD-BRL")
+  requisicao_dic = requisicao.json()
+  cotacao_dolar = requisicao_dic["USDBRL"]["bid"]
+  porcentagem = cotacao_dolar * (1 / padrao)
+  if (cotacao_dolar > padrao):
+    await ctx.send(
+      f"A cotação atual do dólar é R$ {cotacao_dolar}; houve um aumento de {porcentagem}%"
+      .replace('.', ','))
+  elif (cotacao_dolar < padrao):
+    await ctx.send(
+      f"A cotação atual do dólar é R$ {cotacao_dolar}; houve um decréscimo de {porcentagem}%"
+      .replace('.', ','))
+
+
+@client.command()
 async def desenho(ctx):
-  aleat = random.randint(1, 10)
+  aleat = random.randint(1, 18)
   if (aleat == 1):
     await ctx.send('Desenhe um fantasma.')
   elif (aleat == 2):
@@ -58,11 +102,27 @@ async def desenho(ctx):
     await ctx.send('Desenhe algo relacionado à última emoção que sentiu.')
   elif (aleat == 10):
     await ctx.send('Desenhe um robô humanóide futurístico.')
+  elif (aleat == 11):
+    await ctx.send('Faça uma caricatura de si mesmo(a).')
+  elif (aleat == 12):
+    await ctx.send('Desenhe espelhos de diferentes ângulos.')
+  elif (aleat == 13):
+    await ctx.send('Rabisque um autorretrato no reflexo de uma colher.')
+  elif (aleat == 14):
+    await ctx.send('Ilustre a vista de uma janela.')
+  elif (aleat == 15):
+    await ctx.send('Esboce as nuvens.')
+  elif (aleat == 16):
+    await ctx.send('Combine formas de animais e faça uma criatura mítica.')
+  elif (aleat == 17):
+    await ctx.send('Dê um rosto para o personagem de um livro que você ama.')
+  elif (aleat == 18):
+    await ctx.send('Retrate uma cena para sua música favorita.')
 
 
 @client.command()
 async def fato(ctx):
-  rand = random.randint(1, 10)
+  rand = random.randint(1, 18)
   if (rand == 1):
     await ctx.send(
       'Há mais estrelas no universo do que grãos de areia em todas as praias da Terra.'
@@ -95,6 +155,35 @@ async def fato(ctx):
     )
   elif (rand == 10):
     await ctx.send('Vetores são um ótimo atalho!')
+  elif (rand == 11):
+    await ctx.send(
+      'Elétrons são partículas fundamentais, mas prótons não o são.')
+  elif (rand == 12):
+    await ctx.send('Algumas pessoas vêem um rosto na lua.')
+  elif (rand == 13):
+    await ctx.send(
+      'Se você passasse um picossegundo (10^-12 s) no núcleo do sol, todos os seus órgãos seriam queimados à 25° C.'
+    )
+  elif (rand == 14):
+    await ctx.send(
+      'O tempo de Planck é o tempo passado sobre o Big Bang a partir do qual as implicações da teoria da relatividade geral passaram a ser válidas. Este intervalo de tempo situa-se na ordem dos 10^-43 s.'
+    )
+  elif (rand == 15):
+    await ctx.send(
+      'Quando elétrons recebem energia, eles passam para uma nova camada de distribuição eletrônica. Durante a volta, eles emitem luz.'
+    )
+  elif (rand == 16):
+    await ctx.send(
+      'Einstein morreu sem aceitar a teoria quântica. Para ele, a sua ideia de relatividade bastava para explicar o universo.'
+    )
+  elif (rand == 17):
+    await ctx.send(
+      'Se misturássemos todos os elementos da tabela periódica, o resultado seria o chamado "glúon de plasma" (o que os cientistas acreditam que saiu do Big Bang), ou plutônio em chamas.'
+    )
+  elif (rand == 18):
+    await ctx.send(
+      'Não é possível saber com exatidão o momento (massa x velocidade) e a posição de uma partícula ao mesmo tempo. Esse é o chamado Princípio da Incerteza de Heisenberg.'
+    )
 
 
 @client.command()
